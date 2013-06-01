@@ -1,30 +1,31 @@
 package com.github.dublekfx.EnderSwap;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class EnderSwap extends JavaPlugin	implements Listener	{
 	
 	private Player pShooter, pTarget;
-	private Location pShooterLoc;
+	private Location pShooterLoc, pTargetLoc;
 	private Projectile pearl;
-	private boolean swapToggle = true;
+	private boolean swapToggle = true, pendingSwap = false;
 	
 	@Override
 	public void onEnable()	{
+		getServer().getPluginManager().registerEvents(this, this);
 		getLogger().info("EnderSwap is " + swapToggle);
 	}
 		
@@ -46,15 +47,19 @@ public final class EnderSwap extends JavaPlugin	implements Listener	{
 		return false;
 	}
 	
-	@EventHandler
+	@EventHandler 
 	public void onEnderpearl(ProjectileHitEvent	event)	{
+		if(event.getEntityType().equals(EntityType.ENDER_PEARL))	{
+		//getLogger().info("event");
 		if (swapToggle == true)	{
 			pearl = event.getEntity();
 			LivingEntity shoot = (Player) pearl.getShooter();				//Determine the shooter
 			if(shoot.getType().equals(EntityType.PLAYER))	{
 				pShooter = (Player) shoot;
-			}		
-			List<Entity> nearEntity = pearl.getNearbyEntities(.5, .5, .5);	//Choose a target
+			}
+			//getLogger().info("Shooter is " + pShooter.getName());
+		/*	List<Entity> nearEntity = pearl.getNearbyEntities(1, 1, 1);	//Choose a target
+			getLogger().info(nearEntity.toString());
 			ArrayList<Player> pList = new ArrayList<>();
 			for(Entity e : nearEntity)	{
 				if(e.getType().equals(EntityType.PLAYER))	{
@@ -62,17 +67,41 @@ public final class EnderSwap extends JavaPlugin	implements Listener	{
 					pList.add(pNear);
 				}
 			}
+			if(pList.contains(pShooter))	{
+				pList.remove(pShooter);
+			}
 			if(pList.size() == 1)	{
 				pTarget = pList.get(0);
 			}
 			else	{
 				int i = (int) (pList.size() * Math.random());
 				pTarget = pList.get(i);
-			}
+		*/	}
+			//getLogger().info("Target is " + pTarget.getName());
 			pShooterLoc = pShooter.getLocation();
+			pTargetLoc = pTarget.getLocation();
 			if(!(pTarget.isSneaking()))	{
 				pTarget.teleport(pShooterLoc);
 			}
+			pShooter.teleport(pTargetLoc);
+			getLogger().info(pShooter.getName() + " has swapped with " + pTarget.getName());
+			pTarget = null;
+			pendingSwap = false;
 		}
 	}
+	
+	@EventHandler
+	public void onPlayerDamage(EntityDamageEvent event)	{
+		if(event.getCause().equals(DamageCause.PROJECTILE) && event.getEntityType().equals(EntityType.PLAYER))	{
+			pTarget = (Player) event.getEntity();
+			pendingSwap = true;
+		}
+	}
+	@EventHandler
+	public void onPlayerTeleport(PlayerTeleportEvent event)	{
+		if(event.getCause().equals(TeleportCause.ENDER_PEARL) && swapToggle == true && pendingSwap == true)	{
+			event.setCancelled(true);
+		}
+	}
+	
 }
