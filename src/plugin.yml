@@ -1,0 +1,9 @@
+name: EnderSwap
+main: com.github.dublekfx.EnderSwap.EnderSwap
+version: 1.0
+commands:
+  enderswap:
+    description: Toggle Player swapping on Enderpearl impact
+    usage: /enderswap
+    permission: enderswap.toggle
+    permission-message: You can't do this...
