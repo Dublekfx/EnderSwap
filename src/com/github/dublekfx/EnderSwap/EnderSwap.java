@@ -10,9 +10,7 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -47,53 +45,14 @@ public final class EnderSwap extends JavaPlugin	implements Listener	{
 		}
 		return false;
 	}
-	
-/*	@EventHandler 
-	public void onEnderpearl(ProjectileHitEvent	event)	{
-		if(event.getEntityType().equals(EntityType.ENDER_PEARL))	{
-		//getLogger().info("event");
-		if (swapToggle == true)	{
-			pearl = event.getEntity();
-			LivingEntity shoot = (Player) pearl.getShooter();				//Determine the shooter
-			if(shoot.getType().equals(EntityType.PLAYER))	{
-				pShooter = (Player) shoot;
-			}
-			//getLogger().info("Shooter is " + pShooter.getName());
-		/*	List<Entity> nearEntity = pearl.getNearbyEntities(1, 1, 1);	//Choose a target
-			getLogger().info(nearEntity.toString());
-			ArrayList<Player> pList = new ArrayList<>();
-			for(Entity e : nearEntity)	{
-				if(e.getType().equals(EntityType.PLAYER))	{
-					Player pNear = (Player) e;
-					pList.add(pNear);
-				}
-			}
-			if(pList.contains(pShooter))	{
-				pList.remove(pShooter);
-			}
-			if(pList.size() == 1)	{
-				pTarget = pList.get(0);
-			}
-			else	{
-				int i = (int) (pList.size() * Math.random());
-				pTarget = pList.get(i);
-			}
-			//getLogger().info("Target is " + pTarget.getName());
-			pShooterLoc = pShooter.getLocation();
-			pTargetLoc = pTarget.getLocation();
-			if(!(pTarget.isSneaking()))	{
-				pTarget.teleport(pShooterLoc);
-			}
-			pShooter.teleport(pTargetLoc);
-			getLogger().info(pShooter.getName() + " has swapped with " + pTarget.getName());
-			pTarget = null;
-			pendingSwap = false;
-		}
-	}*/
-	
+
 	@EventHandler
 	public void onPlayerDamage(EntityDamageByEntityEvent event)	{
+		if(event.isCancelled())	{
+			return;
+		}		
 		if(event.getEntityType().equals(EntityType.PLAYER) && event.getCause().equals(DamageCause.PROJECTILE) && event.getDamager().getType().equals(EntityType.ENDER_PEARL))	{
+			event.setCancelled(true);
 			pearl = (Projectile) event.getDamager();
 			LivingEntity shoot = (Player) pearl.getShooter();				//Determine the shooter
 			if(shoot.getType().equals(EntityType.PLAYER))	{
