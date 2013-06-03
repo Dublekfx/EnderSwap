@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -47,7 +48,7 @@ public final class EnderSwap extends JavaPlugin	implements Listener	{
 		return false;
 	}
 	
-	@EventHandler 
+/*	@EventHandler 
 	public void onEnderpearl(ProjectileHitEvent	event)	{
 		if(event.getEntityType().equals(EntityType.ENDER_PEARL))	{
 		//getLogger().info("event");
@@ -76,7 +77,7 @@ public final class EnderSwap extends JavaPlugin	implements Listener	{
 			else	{
 				int i = (int) (pList.size() * Math.random());
 				pTarget = pList.get(i);
-		*/	}
+			}
 			//getLogger().info("Target is " + pTarget.getName());
 			pShooterLoc = pShooter.getLocation();
 			pTargetLoc = pTarget.getLocation();
@@ -88,13 +89,24 @@ public final class EnderSwap extends JavaPlugin	implements Listener	{
 			pTarget = null;
 			pendingSwap = false;
 		}
-	}
+	}*/
 	
 	@EventHandler
-	public void onPlayerDamage(EntityDamageEvent event)	{
-		if(event.getCause().equals(DamageCause.PROJECTILE) && event.getEntityType().equals(EntityType.PLAYER))	{
+	public void onPlayerDamage(EntityDamageByEntityEvent event)	{
+		if(event.getEntityType().equals(EntityType.PLAYER) && event.getCause().equals(DamageCause.PROJECTILE) && event.getDamager().getType().equals(EntityType.ENDER_PEARL))	{
+			pearl = (Projectile) event.getDamager();
+			LivingEntity shoot = (Player) pearl.getShooter();				//Determine the shooter
+			if(shoot.getType().equals(EntityType.PLAYER))	{
+				pShooter = (Player) shoot;
+			}			
 			pTarget = (Player) event.getEntity();
-			pendingSwap = true;
+			pShooterLoc = pShooter.getLocation();
+			pTargetLoc = pTarget.getLocation();
+			if(!(pTarget.isSneaking()))	{
+				pTarget.teleport(pShooterLoc);
+			}
+			pShooter.teleport(pTargetLoc);
+			getLogger().info(pShooter.getName() + " has swapped with " + pTarget.getName());
 		}
 	}
 	@EventHandler

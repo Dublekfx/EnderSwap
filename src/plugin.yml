@@ -6,4 +6,8 @@ commands:
     description: Toggle Player swapping on Enderpearl impact
     usage: /enderswap
     permission: enderswap.toggle
-    permission-message: You can't do this...
+    permission-message: A voice whispers "You need enderswap.toggle"...
+permissions:
+  enderswap.toggle:
+    description: Permits user to turn Enderswap on or off
+    default: op
